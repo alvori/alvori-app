@@ -1,1 +1,0 @@
-(self["webpackChunknhmr"]=self["webpackChunknhmr"]||[]).push([[177],{353:(e,t,r)=>{"use strict";r.r(t),r.d(t,{default:()=>h});var n=r(393);const s={class:"home"},a=(0,n.Wm)("a",{href:"https://github.com/AlexxxRock/alvori-app",target:"_blank"},"GitHub repository",-1);function o(e,t,r,o,c,h){return(0,n.wg)(),(0,n.j4)("div",s,[a])}const c={name:"Home"};c.render=o;const h=c}}]);
