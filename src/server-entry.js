@@ -1,13 +1,13 @@
-import buildApp from './app';
+import buildApp from './app'
 import './assets/css/app.scss'
 
 export default async context => {
     const {
         router,
         app
-    } = buildApp();
+    } = buildApp()
 
-    await router.push(context.url);
+    await router.push(context.url)
     await router.isReady()
 
     return {

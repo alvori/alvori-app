@@ -1,13 +1,13 @@
-const path = require('path');
-const webpack = require('webpack');
-const WebpackBar = require('webpackbar');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
-const WorkBoxPlugin = require('workbox-webpack-plugin');
+const path = require('path')
+const webpack = require('webpack')
+const WebpackBar = require('webpackbar')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin')
+const WorkBoxPlugin = require('workbox-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
-const { merge } = require('webpack-merge');
-const baseConfig = require('./base.js');
+const { merge } = require('webpack-merge')
+const baseConfig = require('./base.js')
 
 const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE

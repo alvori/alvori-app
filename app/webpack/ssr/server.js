@@ -1,7 +1,7 @@
-const path = require('path');
-const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
-const WebpackBar = require('webpackbar');
+const path = require('path')
+const webpack = require('webpack')
+const nodeExternals = require('webpack-node-externals')
+const WebpackBar = require('webpackbar')
 const {
     merge
 } = require('webpack-merge')

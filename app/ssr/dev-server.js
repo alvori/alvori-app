@@ -6,13 +6,13 @@ const WebpackDevServer = require('webpack-dev-server')
 const chokidar = require('chokidar')
 const {
     renderToString
-} = require('@vue/server-renderer');
+} = require('@vue/server-renderer')
 const app = express()
 const MFS = require('memory-fs');
-const requireFromString = require('require-from-string');
+const requireFromString = require('require-from-string')
 const readFile = (fs, file) => {
     try {
-        return fs.readFileSync(path.join(path.resolve(__dirname, '../../dist'), file), 'utf-8');
+        return fs.readFileSync(path.join(path.resolve(__dirname, '../../dist'), file), 'utf-8')
     } catch (e) {}
 };
 
@@ -23,49 +23,49 @@ const clientCompiler = webpack(clientConfig)
 const serverCompiler = webpack(serverConfig)
 
 const setup = (cb) => {
-    let bundle, tpl, ready;
+    let bundle, tpl, ready
 
     const readyPromise = new Promise((r) => {
-        ready = r;
+        ready = r
     })
 
     const update = () => {
         if (bundle && tpl) {
             ready();
-            cb(bundle, tpl);
+            cb(bundle, tpl)
         }
-    };
+    }
 
     const cmfs = new MFS();
-    clientCompiler.outputFileSystem = cmfs;
+    clientCompiler.outputFileSystem = cmfs
     clientCompiler.hooks.done.tap('done-compiling', ({ compilation: { errors, warnings, assets }}) => {
         errors.forEach(err => console.error('[Client]', err))
         warnings.forEach(err => console.warn('[Client]', err))
     
         if (errors.length === 0) {
             const tplPath = path.join(path.resolve(__dirname, '../../dist'), 'index.html')
-            tpl = cmfs.readFileSync(tplPath, 'utf-8');
+            tpl = cmfs.readFileSync(tplPath, 'utf-8')
             cmfs.unlinkSync(tplPath, 'index.html')
             update()
         }
     })
 
-    const mfs = new MFS();
-    serverCompiler.outputFileSystem = mfs;
+    const mfs = new MFS()
+    serverCompiler.outputFileSystem = mfs
     serverCompiler.watch({}, (err, stats) => {
         if (stats.compilation.errors.length > 0) {
             console.error(stats.compilation.errors)
         }
         if (err) {
-            throw err;
+            throw err
         }
-        stats = stats.toJson();
+        stats = stats.toJson()
         if (stats.errors.length) return;
-        bundle = readFile(mfs, 'server-bundle.js');
-        update();
+        bundle = readFile(mfs, 'server-bundle.js')
+        update()
     });
 
-    return readyPromise;
+    return readyPromise
 }
 
 const createRenderer = (bundle) => requireFromString(bundle).default
@@ -84,7 +84,7 @@ const render = async (req, res) => {
     const {
         app,
         router,
-    } = await renderer(context);
+    } = await renderer(context)
 
     let appContent
     let code = 200
@@ -102,7 +102,7 @@ const render = async (req, res) => {
     }
     
     let html = template.replace('<div id="app"></div>', `<div id="app">${appContent}</div>`)
-    res.status(code);
+    res.status(code)
     res.set('content-type', 'text/html')
     res.send(html)
     res.end()
@@ -114,23 +114,23 @@ const server = new WebpackDevServer(clientCompiler, {
         chokidar.watch(
             ['./public/index.html']
         ).on('all', function () {
-            server.sockWrite(server.sockets, 'content-changed');
+            server.sockWrite(server.sockets, 'content-changed')
             console.log('\x1b[32m','HTML template updated', '\x1b[37m')
         })
     },
     after: (app) => {
-        app.use('/manifest.json', express.static(path.join(__dirname, '../../public', 'manifest.json')));
-        app.use('/favicon.ico', express.static(path.join(__dirname, '../../public', 'favicon.ico')));
-        app.use('/assets', express.static(path.join(__dirname, '../../src', 'assets')));
-        app.use('/favicon', express.static(path.join(__dirname, '../../public', 'favicon')));
+        app.use('/manifest.json', express.static(path.join(__dirname, '../../public', 'manifest.json')))
+        app.use('/favicon.ico', express.static(path.join(__dirname, '../../public', 'favicon.ico')))
+        app.use('/assets', express.static(path.join(__dirname, '../../src', 'assets')))
+        app.use('/favicon', express.static(path.join(__dirname, '../../public', 'favicon')))
         app.get(clientConfig.output.publicPath + '*', async (req, res) => {
-            await readyPromise;
-            render(req, res);
+            await readyPromise
+            render(req, res)
         })
     }
 })
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000
 server.listen(PORT,  () => {
-    console.log(`App listening on port http://localhost:${PORT}\n`);
+    console.log(`App listening on port http://localhost:${PORT}\n`)
 });

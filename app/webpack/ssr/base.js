@@ -1,11 +1,11 @@
-const path = require('path');
-const webpack = require('webpack');
+const path = require('path')
+const webpack = require('webpack')
 const {
     VueLoaderPlugin
 } = require('vue-loader')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require("terser-webpack-plugin");
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const TerserPlugin = require("terser-webpack-plugin")
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE

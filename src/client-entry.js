@@ -4,7 +4,7 @@ import './assets/css/app.scss'
 const {
     app,
     router
-} = buildApp();
+} = buildApp()
 
 router.isReady()
     .then(() => {
