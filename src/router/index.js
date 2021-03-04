@@ -19,7 +19,7 @@ const routes = [{
     {
         path: '/:pathMatch(.*)*',
         name: '404',
-        component: () => import('../views/404')
+        component: () => import( /* webpackChunkName: "404" */ '../views/404')
     },
 ]
 

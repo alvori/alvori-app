@@ -3,7 +3,8 @@ import './assets/css/app.scss'
 
 const {
     app,
-    router
+    router,
+    meta
 } = buildApp()
 
 router.isReady()

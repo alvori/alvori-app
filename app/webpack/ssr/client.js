@@ -103,6 +103,7 @@ module.exports = (env, options) =>
                 rel: 'preload',
                 include: 'initial',
                 fileBlacklist: [
+                    /\.(png|jpe?g|gif|webp|svg|mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
                     /\.map$/,
                     /hot-update\.js$/
                 ]

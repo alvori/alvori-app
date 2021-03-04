@@ -31,17 +31,23 @@ const setup = (cb) => {
 
     const update = () => {
         if (bundle && tpl) {
-            ready();
+            ready()
             cb(bundle, tpl)
         }
     }
 
     const cmfs = new MFS();
     clientCompiler.outputFileSystem = cmfs
-    clientCompiler.hooks.done.tap('done-compiling', ({ compilation: { errors, warnings, assets }}) => {
+    clientCompiler.hooks.done.tap('done-compiling', ({
+        compilation: {
+            errors,
+            warnings,
+            assets
+        }
+    }) => {
         errors.forEach(err => console.error('[Client]', err))
         warnings.forEach(err => console.warn('[Client]', err))
-    
+
         if (errors.length === 0) {
             const tplPath = path.join(path.resolve(__dirname, '../../dist'), 'index.html')
             tpl = cmfs.readFileSync(tplPath, 'utf-8')
@@ -70,11 +76,19 @@ const setup = (cb) => {
 
 const createRenderer = (bundle) => requireFromString(bundle).default
 
-let renderer,template
+let renderer, template
 const readyPromise = setup(async (bundle, tpl) => {
     template = await tpl
     renderer = await createRenderer(bundle)
 })
+
+const insertMeta = (meta, tpl) => {
+    if(!meta) return tpl
+    return tpl.replace(`<html`, `<html ${meta.htmlAttr}`)
+    .replace(`<head>`, `<head>${meta.head}`)
+    .replace(`<body`, `<body ${meta.bodyAttr}`)
+    .replace(`</body>`, `${meta.body}</body>`)
+}
 
 const render = async (req, res) => {
     const context = {
@@ -84,11 +98,12 @@ const render = async (req, res) => {
     const {
         app,
         router,
+        meta,
     } = await renderer(context)
 
     let appContent
     let code = 200
-    
+
     await renderToString(app).then((result) => {
         appContent = result
     }).catch((err) => {
@@ -97,11 +112,12 @@ const render = async (req, res) => {
         console.error(err)
     })
 
-    if(router.currentRoute._value.name === '404') {
+    if (router.currentRoute._value.name === '404') {
         code = 404
     }
-    
+
     let html = template.replace('<div id="app"></div>', `<div id="app">${appContent}</div>`)
+    html = insertMeta(meta.data, html)
     res.status(code)
     res.set('content-type', 'text/html')
     res.send(html)
@@ -115,7 +131,7 @@ const server = new WebpackDevServer(clientCompiler, {
             ['./public/index.html']
         ).on('all', function () {
             server.sockWrite(server.sockets, 'content-changed')
-            console.log('\x1b[32m','HTML template updated', '\x1b[37m')
+            console.log('\x1b[32m', 'HTML template updated', '\x1b[37m')
         })
     },
     after: (app) => {
@@ -131,6 +147,6 @@ const server = new WebpackDevServer(clientCompiler, {
 })
 
 const PORT = process.env.PORT || 3000
-server.listen(PORT,  () => {
+server.listen(PORT, () => {
     console.log(`App listening on port http://localhost:${PORT}\n`)
 });

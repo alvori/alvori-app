@@ -4,7 +4,8 @@ import './assets/css/app.scss'
 export default async context => {
     const {
         router,
-        app
+        app,
+        meta,
     } = buildApp()
 
     await router.push(context.url)
@@ -12,6 +13,7 @@ export default async context => {
 
     return {
         app,
-        router
+        router,
+        meta,
     }
 }

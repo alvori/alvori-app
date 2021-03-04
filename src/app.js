@@ -5,6 +5,9 @@ import {
 
 import App from './App.vue'
 import router from './router'
+import {
+    meta
+} from './plugins/meta'
 
 const isSSR = typeof window === 'undefined'
 
@@ -25,9 +28,11 @@ export default function () {
     }
 
     app.use(router)
-    
+    app.use(meta)
+
     return {
         app,
         router,
+        meta,
     }
 }

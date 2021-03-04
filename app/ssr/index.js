@@ -10,6 +10,14 @@ const app = express()
 const appPath = path.join(__dirname, 'server-bundle.js')
 const createApp = require(appPath).default
 
+const insertMeta = (meta, tpl) => {
+    if(!meta) return tpl
+    return tpl.replace(`<html`, `<html ${meta.htmlAttr}`)
+    .replace(`<head>`, `<head>${meta.head}`)
+    .replace(`<body`, `<body ${meta.bodyAttr}`)
+    .replace(`</body>`, `${meta.body}</body>`)
+}
+
 const render = async (req, res) => {
 
     const templatePath = path.join(__dirname, 'index.html')
@@ -23,6 +31,7 @@ const render = async (req, res) => {
     const {
         app,
         router,
+        meta,
     } = await createApp(context)
 
     let appContent
@@ -41,6 +50,7 @@ const render = async (req, res) => {
     }
 
     let html = template.replace('<div id="app"></div>', `<div id="app">${appContent}</div>`)
+    html = insertMeta(meta.data, html)
     res.status(code);
     res.set('content-type', 'text/html')
     res.send(html)

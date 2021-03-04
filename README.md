@@ -1,5 +1,5 @@
-# alvori-app
-Starter tool kit SSR/PWA for vue.js v3
+# Vue 3 Server Side Rendering (SSR/PWA) | Alvori Freamwork
+Server Side Rendering (SSR) and Progressive Web Application (PWA) fraemwork for vue.js v3
 
 ## Project setup
 ```
