@@ -17,7 +17,7 @@ const buildDir = {
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
 module.exports = (env, options) => 
-    merge(baseConfig(env), {
+    merge(baseConfig({...env, config: 'client'}), {
         entry: {
             app: './src/client-entry.js'
         },

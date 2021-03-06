@@ -30,6 +30,12 @@ export default function () {
     app.use(router)
     app.use(meta)
 
+    app.directive('focus', {
+        mounted(el) {
+            el.focus()
+        }
+    })
+
     return {
         app,
         router,

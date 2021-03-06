@@ -14,7 +14,7 @@ const buildDir = {
 }
 
 module.exports = (env, options) =>
-    merge(baseConfig(env), {
+    merge(baseConfig({...env, config: 'server'}), {
         entry: {
             app: './src/server-entry.js'
         },
