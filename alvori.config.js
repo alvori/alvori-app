@@ -6,8 +6,10 @@ const directives = {
 
 module.exports = (ctx) => {
     return {
-        directives: [
-            'focus'
+        boot: [
+            {
+                path: 'test',
+            }
         ],
         chainWebpack: (webpackConfig) => {
             webpackConfig.module

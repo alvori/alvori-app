@@ -1,6 +1,5 @@
 <template>
     <div class="home">
-        <input v-focus type="text" /><br>
         <a href="https://github.com/AlexxxRock/alvori-app" target="_blank">GitHub repository</a>
     </div>
 </template>

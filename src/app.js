@@ -1,6 +1,6 @@
 import {
     createSSRApp,
-    createApp
+    createApp,
 } from 'vue'
 
 import App from './App.vue'
@@ -8,6 +8,8 @@ import router from './router'
 import {
     meta
 } from './plugins/meta'
+
+import alvoriConfig from '../alvori.config'
 
 const isSSR = typeof window === 'undefined'
 
@@ -30,10 +32,12 @@ export default function () {
     app.use(router)
     app.use(meta)
 
-    app.directive('focus', {
-        mounted(el) {
-            el.focus()
-        }
+    alvoriConfig().boot.map(async (entry) => {
+        let module = await import(`./boot/${entry.path}`)
+        module.default({
+            app,
+            router
+        })
     })
 
     return {
