@@ -11,29 +11,40 @@ const buildDir = {
     ssr: 'ssr',
 }
 
-module.exports = (env, options) =>
-    merge(baseConfig({ ...env, config: 'server' }), {
-        entry: {
-            app: './src/server-entry.js',
-        },
-        target: 'node',
-        output: {
-            filename: 'server-bundle.js',
-            libraryTarget: 'commonjs2',
-            path: isProd
-                ? path.resolve(__dirname, '../../../dist', buildDir[buildMode])
-                : path.resolve(__dirname, '../../../dist'),
-            publicPath: '/',
-        },
-        externals: nodeExternals({
-            allowlist: /\.(css|vue)$/,
-        }),
-        plugins: [
-            new WebpackBar({
-                name: 'Server',
-            }),
-            new webpack.optimize.LimitChunkCountPlugin({
-                maxChunks: 1,
-            }),
-        ],
+const Chain = require('webpack-chain')
+const webpackConfig = new Chain()
+
+webpackConfig
+    .entry('app')
+    .add('./src/server-entry.js')
+    .end()
+    .output.path(
+        isProd
+            ? path.resolve(__dirname, '../../../dist', buildDir[buildMode])
+            : path.resolve(__dirname, '../../../dist')
+    )
+    .filename('server-bundle.js')
+    .libraryTarget('commonjs2')
+    .publicPath('/')
+
+webpackConfig.target('node')
+
+webpackConfig.externals(
+    nodeExternals({
+        allowlist: /\.(css|vue)$/,
     })
+)
+
+webpackConfig.plugin('webpackBar').use(WebpackBar, [
+    {
+        name: 'Server',
+    },
+])
+
+webpackConfig.plugin('optimize').use(webpack.optimize.LimitChunkCountPlugin, [
+    {
+        maxChunks: 1,
+    },
+])
+
+module.exports = (env, options) => merge(baseConfig({ ...env, config: 'server' }), webpackConfig.toConfig())

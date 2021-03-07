@@ -16,121 +16,139 @@ const buildDir = {
 }
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
-module.exports = (env, options) =>
-    merge(baseConfig({ ...env, config: 'client' }), {
-        entry: {
-            app: './src/client-entry.js',
+const Chain = require('webpack-chain')
+const webpackConfig = new Chain()
+
+webpackConfig
+    .entry('app')
+    .add('./src/client-entry.js')
+    .end()
+    .output.path(isProd ? prodAssetsPath : path.resolve(__dirname, '../../../dist'))
+    .filename('js/[name].js')
+    .chunkFilename('js/[name].js')
+    .publicPath('/')
+
+webpackConfig.devServer
+    .set('stats', 'minimal')
+    .set('contentBase', __dirname + './dist')
+    .set('publicPath', '/')
+    .set('hot', true)
+    .set('disableHostCheck', true)
+    // historyApiFallback: true,
+    .set('overlay', true)
+
+webpackConfig.target('web')
+
+webpackConfig.devtool(isProd ? false : 'source-map')
+
+webpackConfig.optimization.splitChunks({
+    chunks: 'async',
+    cacheGroups: {
+        vendors: {
+            name: 'chunk-vendors',
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            chunks: 'initial',
         },
-        devServer: {
-            stats: 'minimal',
-            contentBase: __dirname + './dist',
-            publicPath: '/',
-            hot: true,
-            disableHostCheck: true,
-            // historyApiFallback: true,
-            overlay: true,
+        common: {
+            name: 'chunk-common',
+            minChunks: 5,
+            priority: -20,
+            chunks: 'initial',
+            reuseExistingChunk: true,
         },
-        devtool: isProd ? false : 'source-map',
-        output: {
-            filename: 'js/[name].js',
-            chunkFilename: 'js/[name].js',
-            path: isProd ? prodAssetsPath : path.resolve(__dirname, '../../../dist'),
-            publicPath: '/',
+    },
+})
+
+webpackConfig.plugin('webpackBar').use(WebpackBar, [
+    {
+        name: 'Client',
+    },
+])
+
+webpackConfig.plugin('MiniCssExtractPlugin').use(MiniCssExtractPlugin, [
+    {
+        filename: isProd ? 'css/[name].[contenthash:8].css' : 'css/[name].css',
+        chunkFilename: isProd ? 'css/[name].[contenthash:8].chunk.css' : 'css/[name].chunk.css',
+    },
+])
+
+if (isProd) {
+    webpackConfig.plugin('workbox').use(WorkBoxPlugin.GenerateSW, [
+        {
+            clientsClaim: true,
+            skipWaiting: true,
+            swDest: './service-worker.js',
+            exclude: [
+                // /index\.html$/,
+                /index\.js$/,
+            ],
+            runtimeCaching: [
+                {
+                    urlPattern: /(.*)/g,
+                    handler: 'NetworkFirst',
+                },
+            ],
         },
-        target: 'web',
-        optimization: {
-            splitChunks: {
-                chunks: 'async',
-                cacheGroups: {
-                    vendors: {
-                        name: 'chunk-vendors',
-                        test: /[\\/]node_modules[\\/]/,
-                        priority: -10,
-                        chunks: 'initial',
-                    },
-                    common: {
-                        name: 'chunk-common',
-                        minChunks: 5,
-                        priority: -20,
-                        chunks: 'initial',
-                        reuseExistingChunk: true,
-                    },
+    ])
+}
+
+webpackConfig.plugin('HtmlWebpackPlugin').use(HtmlWebpackPlugin, [
+    {
+        title: 'app',
+        templateParameters: {
+            pwaManifest: '<link rel="manifest" href="/manifest.json"/>',
+        },
+        chunks: ['vendors', 'common', 'index', 'app'],
+        // base: '/',
+        inject: 'body',
+        template: 'public/index.html',
+        filename: isProd ? '../index.html' : 'index.html',
+        scriptLoading: 'defer',
+        // hash: true,
+    },
+])
+
+webpackConfig.plugin('preload').use(PreloadWebpackPlugin, [
+    {
+        rel: 'preload',
+        include: 'initial',
+        fileBlacklist: [
+            /\.(png|jpe?g|gif|webp|svg|mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+            /\.map$/,
+            /hot-update\.js$/,
+        ],
+    },
+])
+
+webpackConfig.plugin('prefetch').use(PreloadWebpackPlugin, [
+    {
+        rel: 'prefetch',
+        include: 'asyncChunks',
+    },
+])
+
+webpackConfig.plugin('copy').use(CopyPlugin, [
+    {
+        patterns: [
+            {
+                from: './public',
+                toType: 'dir',
+                globOptions: {
+                    ignore: ['**/*.html', '.DS_Store'],
+                },
+                to: prodAssetsPath,
+            },
+            {
+                from: path.resolve(__dirname, '../../ssr/index.js'),
+                to: path.resolve(__dirname, '../../../dist/ssr'),
+                toType: 'dir',
+                info: {
+                    minimized: true,
                 },
             },
-        },
-        plugins: [
-            new WebpackBar({
-                name: 'Client',
-            }),
-            new MiniCssExtractPlugin({
-                filename: isProd ? 'css/[name].[contenthash:8].css' : 'css/[name].css',
-                chunkFilename: isProd ? 'css/[name].[contenthash:8].chunk.css' : 'css/[name].chunk.css',
-            }),
-            ...(isProd
-                ? [
-                      new WorkBoxPlugin.GenerateSW({
-                          clientsClaim: true,
-                          skipWaiting: true,
-                          swDest: './service-worker.js',
-                          exclude: [
-                              // /index\.html$/,
-                              /index\.js$/,
-                          ],
-                          runtimeCaching: [
-                              {
-                                  urlPattern: /(.*)/g,
-                                  handler: 'NetworkFirst',
-                              },
-                          ],
-                      }),
-                  ]
-                : []),
-            new HtmlWebpackPlugin({
-                title: 'app',
-                templateParameters: {
-                    pwaManifest: '<link rel="manifest" href="/manifest.json"/>',
-                },
-                chunks: ['vendors', 'common', 'index', 'app'],
-                // base: '/',
-                inject: 'body',
-                template: 'public/index.html',
-                filename: isProd ? '../index.html' : 'index.html',
-                scriptLoading: 'defer',
-                // hash: true,
-            }),
-            new PreloadWebpackPlugin({
-                rel: 'preload',
-                include: 'initial',
-                fileBlacklist: [
-                    /\.(png|jpe?g|gif|webp|svg|mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-                    /\.map$/,
-                    /hot-update\.js$/,
-                ],
-            }),
-            new PreloadWebpackPlugin({
-                rel: 'prefetch',
-                include: 'asyncChunks',
-            }),
-
-            new CopyPlugin({
-                patterns: [
-                    {
-                        from: './public',
-                        toType: 'dir',
-                        globOptions: {
-                            ignore: ['**/*.html', '.DS_Store'],
-                        },
-                        to: prodAssetsPath,
-                    },
-                    {
-                        from: path.resolve(__dirname, '../../ssr/index.js'),
-                        to: path.resolve(__dirname, '../../../dist/ssr'),
-                        toType: 'dir',
-                        info: {
-                            minimized: true,
-                        },
-                    },
-                ],
-            }),
         ],
-    })
+    },
+])
+
+module.exports = (env, options) => merge(baseConfig({ ...env, config: 'client' }), webpackConfig.toConfig())

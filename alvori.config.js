@@ -1,11 +1,7 @@
 module.exports = (ctx) => {
     return {
         boot: [
-            'test2',
-            {
-                path: 'test',
-                server: false,
-            },
+            // Add boot files
         ],
         chainWebpack: (webpackConfig) => {
             // Example of transforming a directive for server side rendering
