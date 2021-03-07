@@ -1,8 +1,10 @@
 module.exports = (ctx) => {
     return {
         boot: [
+            'test2',
             {
                 path: 'test',
+                server: false,
             },
         ],
         chainWebpack: (webpackConfig) => {
