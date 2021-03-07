@@ -12,14 +12,14 @@ const baseConfig = require('./base.js')
 const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE
 const buildDir = {
-    ssr: 'ssr'
+    ssr: 'ssr',
 }
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
-module.exports = (env, options) => 
-    merge(baseConfig({...env, config: 'client'}), {
+module.exports = (env, options) =>
+    merge(baseConfig({ ...env, config: 'client' }), {
         entry: {
-            app: './src/client-entry.js'
+            app: './src/client-entry.js',
         },
         devServer: {
             stats: 'minimal',
@@ -46,52 +46,51 @@ module.exports = (env, options) =>
                         name: 'chunk-vendors',
                         test: /[\\/]node_modules[\\/]/,
                         priority: -10,
-                        chunks: 'initial'
+                        chunks: 'initial',
                     },
                     common: {
                         name: 'chunk-common',
                         minChunks: 5,
                         priority: -20,
                         chunks: 'initial',
-                        reuseExistingChunk: true
-                    }
-                }
+                        reuseExistingChunk: true,
+                    },
+                },
             },
         },
         plugins: [
             new WebpackBar({
-                name: 'Client'
+                name: 'Client',
             }),
             new MiniCssExtractPlugin({
                 filename: isProd ? 'css/[name].[contenthash:8].css' : 'css/[name].css',
                 chunkFilename: isProd ? 'css/[name].[contenthash:8].chunk.css' : 'css/[name].chunk.css',
             }),
-            ...isProd ? [
-                new WorkBoxPlugin.GenerateSW({
-                    clientsClaim: true,
-                    skipWaiting: true,
-                    swDest: './service-worker.js',
-                    exclude: [
-                        // /index\.html$/,
-                        /index\.js$/,
-                    ],
-                    runtimeCaching: [{
-                        urlPattern: /(.*)/g,
-                        handler: 'NetworkFirst',
-                    }],
-                }),
-            ] : [],
+            ...(isProd
+                ? [
+                      new WorkBoxPlugin.GenerateSW({
+                          clientsClaim: true,
+                          skipWaiting: true,
+                          swDest: './service-worker.js',
+                          exclude: [
+                              // /index\.html$/,
+                              /index\.js$/,
+                          ],
+                          runtimeCaching: [
+                              {
+                                  urlPattern: /(.*)/g,
+                                  handler: 'NetworkFirst',
+                              },
+                          ],
+                      }),
+                  ]
+                : []),
             new HtmlWebpackPlugin({
                 title: 'app',
                 templateParameters: {
-                    pwaManifest: '<link rel="manifest" href="/manifest.json"/>'
+                    pwaManifest: '<link rel="manifest" href="/manifest.json"/>',
                 },
-                chunks: [
-                    'vendors',
-                    'common',
-                    'index',
-                    'app',
-                ],
+                chunks: ['vendors', 'common', 'index', 'app'],
                 // base: '/',
                 inject: 'body',
                 template: 'public/index.html',
@@ -105,23 +104,21 @@ module.exports = (env, options) =>
                 fileBlacklist: [
                     /\.(png|jpe?g|gif|webp|svg|mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
                     /\.map$/,
-                    /hot-update\.js$/
-                ]
+                    /hot-update\.js$/,
+                ],
             }),
             new PreloadWebpackPlugin({
                 rel: 'prefetch',
-                include: 'asyncChunks'
+                include: 'asyncChunks',
             }),
-    
+
             new CopyPlugin({
-                patterns: [{
+                patterns: [
+                    {
                         from: './public',
                         toType: 'dir',
                         globOptions: {
-                            ignore: [
-                                '**/*.html',
-                                '.DS_Store',
-                            ]
+                            ignore: ['**/*.html', '.DS_Store'],
                         },
                         to: prodAssetsPath,
                     },
@@ -130,10 +127,10 @@ module.exports = (env, options) =>
                         to: path.resolve(__dirname, '../../../dist/ssr'),
                         toType: 'dir',
                         info: {
-                            minimized: true
+                            minimized: true,
                         },
-                    }
-                ]
-            }),    
+                    },
+                ],
+            }),
         ],
     })

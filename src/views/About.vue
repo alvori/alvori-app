@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import {useMeta} from '../plugins/meta'
+import { useMeta } from '../plugins/meta'
 
 export default {
     name: 'About',
@@ -12,16 +12,16 @@ export default {
         const meta = {
             title: 'About',
             meta: {
-                description: {name: 'description', content: 'About page'}
+                description: { name: 'description', content: 'About page' },
             },
             script: {
                 ldJson: {
                     type: 'application/ld+json',
-                    innerHTML: `{ "@context": "http://schema.orgggg" }`
-                }
+                    innerHTML: `{ "@context": "http://schema.orgggg" }`,
+                },
             },
         }
         useMeta(meta)
-    }
+    },
 }
 </script>

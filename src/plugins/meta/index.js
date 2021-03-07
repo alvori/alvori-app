@@ -1,4 +1,4 @@
-import {reactive} from 'vue'
+import { reactive } from 'vue'
 
 let ready
 const isSSR = typeof window === 'undefined'
@@ -7,17 +7,17 @@ const store = reactive({
     meta: null,
 })
 
-const useMeta = (data) => {    
-    if(!isSSR) {
-        for(let item in data) {
-            if(item === 'title') {
+const useMeta = (data) => {
+    if (!isSSR) {
+        for (let item in data) {
+            if (item === 'title') {
                 document.title = data[item] || ''
-            } else if(['meta','link','script','noscript'].includes(item)){
+            } else if (['meta', 'link', 'script', 'noscript'].includes(item)) {
                 for (let key in data[item]) {
                     let el = document.querySelector(`${item}[data-meta=${key}]`)
                     createOrUpdate(el, key, item, data[item][key])
                 }
-            } else if(['htmlAttr','bodyAttr'].includes(item)) {
+            } else if (['htmlAttr', 'bodyAttr'].includes(item)) {
                 setBodyHtmlAttrs(item, data[item])
             }
         }
@@ -29,31 +29,31 @@ const useMeta = (data) => {
             body: ``,
         }
 
-        for(let item in data) {
-            if(item === 'title') {
+        for (let item in data) {
+            if (item === 'title') {
                 meta.head = meta.head + `<title>${data[item]}</title>`
-            } else if(['meta','link'].includes(item)){
+            } else if (['meta', 'link'].includes(item)) {
                 for (let key in data[item]) {
                     let el = `<${item}`
-                    for(let attr in data[item][key]) {
+                    for (let attr in data[item][key]) {
                         el += ` ${attr}="${data[item][key][attr]}"`
                     }
                     el = el + ` data-meta="${key}" />`
                     meta.head = meta.head + el
                 }
-            } else if(['script','noscript'].includes(item)) {
+            } else if (['script', 'noscript'].includes(item)) {
                 for (let key in data[item]) {
                     let el = `<${item}`
-                    for(let attr in data[item][key]) {
-                        if(attr === 'innerHTML') continue
+                    for (let attr in data[item][key]) {
+                        if (attr === 'innerHTML') continue
                         el += ` ${attr}="${data[item][key][attr]}"`
                     }
                     el = el + ` data-meta="${key}">${data[item][key]['innerHTML']}</${item}>`
-                    item === 'script' ? meta.head = meta.head + el : meta.body = meta.body + el
+                    item === 'script' ? (meta.head = meta.head + el) : (meta.body = meta.body + el)
                 }
-            } else if(['htmlAttr','bodyAttr'].includes(item)) {
+            } else if (['htmlAttr', 'bodyAttr'].includes(item)) {
                 let attrs = ``
-                for(let attr in data[item]) {
+                for (let attr in data[item]) {
                     attrs += ` ${attr}="${data[item][attr] || ``}"`
                 }
                 meta[item] = attrs
@@ -61,7 +61,6 @@ const useMeta = (data) => {
 
             store.meta = meta
         }
-
     }
     ready()
 }
@@ -72,8 +71,8 @@ const createOrUpdate = (el, key, item, data) => {
 }
 
 const buildNode = (node, key, data) => {
-    for(let attr in data) {
-        if(attr === 'innerHTML') {
+    for (let attr in data) {
+        if (attr === 'innerHTML') {
             node.innerHTML = data.innerHTML || ``
             continue
         }
@@ -85,7 +84,7 @@ const buildNode = (node, key, data) => {
 
 const setBodyHtmlAttrs = (node, data) => {
     let el = document.querySelector(node.replace('Attr', ``))
-    for(let attr in data) {
+    for (let attr in data) {
         el.setAttribute(attr, data[attr] || ``)
     }
 }
@@ -103,7 +102,7 @@ const meta = {
         this.data = null
         await readyPromise
         this.data = store.meta
-    }
+    },
 }
 
-export {useMeta, meta}
+export { useMeta, meta }

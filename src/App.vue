@@ -1,6 +1,6 @@
 <template>
     <div>
-        <img src="./assets/logo.png" alt="" style="width: 160px; margin-top: 15vh;">
+        <img src="./assets/logo.png" alt="" style="width: 160px; margin-top: 15vh" />
         <div class="logo">Alvori</div>
         <div class="subtitle">Freamwork for Vue.js v3</div>
         <nav id="nav">
@@ -13,7 +13,7 @@
 
 <script>
 export default {
-    name: "App",
+    name: 'App',
 }
 </script>
 

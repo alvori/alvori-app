@@ -1,16 +1,14 @@
 const path = require('path')
 const webpack = require('webpack')
-const {
-    VueLoaderPlugin
-} = require('vue-loader')
+const { VueLoaderPlugin } = require('vue-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const TerserPlugin = require("terser-webpack-plugin")
+const TerserPlugin = require('terser-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE
 const buildDir = {
-    ssr: 'ssr'
+    ssr: 'ssr',
 }
 
 const Chain = require('webpack-chain')
@@ -22,21 +20,15 @@ webpackConfig.resolve.alias
     .set('@', path.resolve(__dirname, '../../../src'))
     .set('vue$', 'vue/dist/vue.runtime.esm-bundler.js')
 
-webpackConfig.resolve.extensions
-    .add('.mjs')
-    .add('.js')
-    .add('.jsx')
-    .add('.vue')
-    .add('.json')
-    .add('.wasm')
+webpackConfig.resolve.extensions.add('.mjs').add('.js').add('.jsx').add('.vue').add('.json').add('.wasm')
 
 webpackConfig.module.noParse(/^(vue|vue-router|vuex|vuex-router-sync)$/)
 
 webpackConfig.module
     .rule('babel')
     .test(/\.m?js$/)
-    .exclude
-    .add(/(node_modules|bower_components)/).end()
+    .exclude.add(/(node_modules|bower_components)/)
+    .end()
     .use('babel')
     .loader('babel-loader')
     .options({
@@ -52,8 +44,8 @@ webpackConfig.module
 webpackConfig.module
     .rule('scss')
     .test(/\.(sa|sc|c)ss$/)
-    .exclude
-    .add(/(node_modules|bower_components)/).end()
+    .exclude.add(/(node_modules|bower_components)/)
+    .end()
     .use('miniCssExtractPluginLoader')
     .loader(MiniCssExtractPlugin.loader)
     .end()
@@ -77,9 +69,9 @@ webpackConfig.module
         fallback: {
             loader: 'file-loader',
             options: {
-                name: process.env.CONFIG === 'client' ? 'img/[name].[ext]' : 'public/img/[name].[ext]'
-            }
-        }
+                name: process.env.CONFIG === 'client' ? 'img/[name].[ext]' : 'public/img/[name].[ext]',
+            },
+        },
     })
 
 webpackConfig.module
@@ -88,7 +80,7 @@ webpackConfig.module
     .use('svg')
     .loader('file-loader')
     .options({
-        name: 'img/[name].[hash:8].[ext]'
+        name: 'img/[name].[hash:8].[ext]',
     })
 
 webpackConfig.module
@@ -101,9 +93,9 @@ webpackConfig.module
         fallback: {
             loader: 'file-loader',
             options: {
-                name: 'media/[name].[hash:8].[ext]'
-            }
-        }
+                name: 'media/[name].[hash:8].[ext]',
+            },
+        },
     })
 
 webpackConfig.module
@@ -116,58 +108,61 @@ webpackConfig.module
         fallback: {
             loader: 'file-loader',
             options: {
-                name: 'fonts/[name].[hash:8].[ext]'
-            }
-        }
+                name: 'fonts/[name].[hash:8].[ext]',
+            },
+        },
     })
 
 webpackConfig.optimization
     .minimize(isProd ? true : false)
     .minimizer('terser')
-    .use(TerserPlugin, [{
-        sourceMap: isProd ? false : true,
-        cache: true,
-        parallel: true,
-        extractComments: false,
-        terserOptions: {
-            compress: {
-                arrows: false,
-                collapse_vars: false,
-                comparisons: false,
-                computed_props: false,
-                hoist_funs: false,
-                hoist_props: false,
-                hoist_vars: false,
-                inline: false,
-                loops: false,
-                negate_iife: false,
-                properties: false,
-                reduce_funcs: false,
-                reduce_vars: false,
-                switches: false,
-                toplevel: false,
-                typeofs: false,
-                booleans: true,
-                if_return: true,
-                sequences: true,
-                unused: true,
-                conditionals: true,
-                dead_code: true,
-                evaluate: true
+    .use(TerserPlugin, [
+        {
+            sourceMap: isProd ? false : true,
+            cache: true,
+            parallel: true,
+            extractComments: false,
+            terserOptions: {
+                compress: {
+                    arrows: false,
+                    collapse_vars: false,
+                    comparisons: false,
+                    computed_props: false,
+                    hoist_funs: false,
+                    hoist_props: false,
+                    hoist_vars: false,
+                    inline: false,
+                    loops: false,
+                    negate_iife: false,
+                    properties: false,
+                    reduce_funcs: false,
+                    reduce_vars: false,
+                    switches: false,
+                    toplevel: false,
+                    typeofs: false,
+                    booleans: true,
+                    if_return: true,
+                    sequences: true,
+                    unused: true,
+                    conditionals: true,
+                    dead_code: true,
+                    evaluate: true,
+                },
+                mangle: {
+                    safari10: true,
+                },
             },
-            mangle: {
-                safari10: true
-            }
         },
-
-    }])
+    ])
 
 webpackConfig.plugin('vue').use(VueLoaderPlugin)
-webpackConfig.plugin('define').use(webpack.DefinePlugin, [{
-    __VUE_OPTIONS_API__: true,
-    __VUE_PROD_DEVTOOLS__: false,
-    'process.env.MODE': JSON.stringify(process.env.MODE)
-}])
+webpackConfig.plugin('define').use(webpack.DefinePlugin, [
+    {
+        __VUE_OPTIONS_API__: true,
+        __VUE_PROD_DEVTOOLS__: false,
+        'process.env.MODE': JSON.stringify(process.env.MODE),
+    },
+])
 webpackConfig.plugin('friendyErrors').use(FriendlyErrorsWebpackPlugin)
 
 module.exports = (env, options) => {
