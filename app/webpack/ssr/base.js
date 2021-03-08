@@ -161,11 +161,30 @@ webpackConfig.plugin('define').use(webpack.DefinePlugin, [
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false,
         'process.env.MODE': JSON.stringify(process.env.MODE),
+        // __BOOT__: JSON.stringify(),
     },
 ])
 webpackConfig.plugin('friendyErrors').use(FriendlyErrorsWebpackPlugin)
 
 module.exports = (env, options) => {
-    require('../../../alvori.config')(env).chainWebpack(webpackConfig)
+    const alvoriConfig = require('../../../alvori.config')(env)
+    alvoriConfig.chainWebpack(webpackConfig)
+
+    webpackConfig.plugin('define').use(webpack.DefinePlugin, [
+        {
+            __VUE_OPTIONS_API__: true,
+            __VUE_PROD_DEVTOOLS__: false,
+            'process.env.MODE': JSON.stringify(process.env.MODE),
+            __BOOT__: JSON.stringify(alvoriConfig.boot),
+        },
+    ])
+    // webpackConfig.plugin('define').tap((args) => {
+    //     return [
+    //         {
+    //             // ...args,
+    //             __BOOT__: JSON.stringify(alvoriConfig.boot),
+    //         },
+    //     ]
+    // })
     return webpackConfig.toConfig(env, options)
 }

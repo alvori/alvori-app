@@ -4,8 +4,6 @@ import App from './App.vue'
 import router from './router'
 import { meta } from './plugins/meta'
 
-import alvoriConfig from '../alvori.config'
-
 const isSSR = typeof window === 'undefined' || false
 
 export default function (ctx) {
@@ -29,7 +27,7 @@ export default function (ctx) {
     app.use(router)
     app.use(meta)
 
-    alvoriConfig().boot.forEach(async (entry) => {
+    __BOOT__.forEach(async (entry) => {
         const entryType = typeof entry
         const registerModule = async (path) => {
             module = await import(`./boot/${path}`)
