@@ -175,7 +175,7 @@ module.exports = (env, options) => {
             __VUE_OPTIONS_API__: true,
             __VUE_PROD_DEVTOOLS__: false,
             'process.env.MODE': JSON.stringify(process.env.MODE),
-            __BOOT__: JSON.stringify(alvoriConfig.boot),
+            __ALVORI_BOOT__: JSON.stringify(alvoriConfig.boot),
         },
     ])
     // webpackConfig.plugin('define').tap((args) => {

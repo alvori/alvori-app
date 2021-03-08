@@ -27,7 +27,7 @@ export default function (ctx) {
     app.use(router)
     app.use(meta)
 
-    __BOOT__.forEach(async (entry) => {
+    __ALVORI_BOOT__.forEach(async (entry) => {
         const entryType = typeof entry
         const registerModule = async (path) => {
             module = await import(`./boot/${path}`)
