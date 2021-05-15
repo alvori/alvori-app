@@ -75,7 +75,7 @@ const runBuild = async (args) => {
                 )
                 resolve()
             } else {
-                console.log(colors.red(`File preparation error: The package.json file does not exist`))
+                console.log(`File preparation error: The package.json file does not exist`)
                 reject()
             }
         })
