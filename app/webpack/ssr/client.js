@@ -13,6 +13,7 @@ const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE
 const buildDir = {
     ssr: 'ssr',
+    spa: 'spa',
 }
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
