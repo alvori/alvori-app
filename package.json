@@ -17,11 +17,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "serve:dev": "cross-env MODE=development BUILD_MODE=ssr node app/ssr/dev-server.js",
-        "serve:prod": "cross-env MODE=production node dist/ssr/index.js",
-        "build": "rimraf dist && npm run build:client && npm run build:server",
-        "build:client": "cross-env MODE=production BUILD_MODE=ssr CONFIG=client webpack --config app/webpack/ssr/client.js --progress",
-        "build:server": "cross-env MODE=production BUILD_MODE=ssr CONFIG=server webpack --config app/webpack/ssr/server.js --progress"
+        "build": "rimraf dist && npm run build:client && npm run build:server"
     },
     "author": "Alexander Kudryashov",
     "license": "MIT",
