@@ -9,7 +9,7 @@ const isSSR = typeof window === 'undefined' || false
 export default function (ctx) {
     const app = isSSR ? createSSRApp(App) : createApp(App)
 
-    if (!isSSR && process.env.MODE === 'production') {
+    if (!isSSR && process.env.PWA && process.env.MODE === 'production') {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker
@@ -22,6 +22,13 @@ export default function (ctx) {
                     })
             })
         }
+    } else if (!isSSR) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+                registration.unregister()
+            })
+        })
+        caches.keys().then((cs) => cs.forEach((c) => caches.delete(c)))
     }
 
     app.use(router)

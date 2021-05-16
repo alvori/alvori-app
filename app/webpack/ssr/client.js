@@ -14,6 +14,8 @@ const buildMode = process.env.BUILD_MODE
 const buildDir = {
     ssr: 'ssr',
     spa: 'spa',
+    pwa: 'pwa',
+    ssrpwa: 'ssrpwa',
 }
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
@@ -74,7 +76,7 @@ webpackConfig.plugin('MiniCssExtractPlugin').use(MiniCssExtractPlugin, [
     },
 ])
 
-if (isProd) {
+if (isProd && process.env.PWA) {
     webpackConfig.plugin('workbox').use(WorkBoxPlugin.GenerateSW, [
         {
             clientsClaim: true,

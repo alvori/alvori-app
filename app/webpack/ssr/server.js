@@ -9,6 +9,7 @@ const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.BUILD_MODE
 const buildDir = {
     ssr: 'ssr',
+    ssrpwa: 'ssrpwa',
 }
 
 const Chain = require('webpack-chain')

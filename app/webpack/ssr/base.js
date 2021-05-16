@@ -161,7 +161,6 @@ webpackConfig.plugin('define').use(webpack.DefinePlugin, [
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false,
         'process.env.MODE': JSON.stringify(process.env.MODE),
-        // __BOOT__: JSON.stringify(),
     },
 ])
 webpackConfig.plugin('friendyErrors').use(FriendlyErrorsWebpackPlugin)
@@ -175,6 +174,7 @@ module.exports = (env, options) => {
             __VUE_OPTIONS_API__: true,
             __VUE_PROD_DEVTOOLS__: false,
             'process.env.MODE': JSON.stringify(process.env.MODE),
+            'process.env.PWA': JSON.stringify(process.env.PWA),
             __ALVORI_BOOT__: JSON.stringify(alvoriConfig.boot),
         },
     ])
