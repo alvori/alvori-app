@@ -6,9 +6,11 @@ const TerserPlugin = require('terser-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 const isProd = process.env.MODE === 'production' ? true : false
-const buildMode = process.env.BUILD_MODE
 const buildDir = {
     ssr: 'ssr',
+    spa: 'spa',
+    'spa-pwa': 'spa-pwa',
+    'ssr-pwa': 'ssr-pwa',
 }
 
 const Chain = require('webpack-chain')

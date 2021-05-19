@@ -5,11 +5,17 @@ const webpack = require('webpack')
 const path = require('path')
 const fs = require('fs')
 const rimraf = require('rimraf')
+const program = require('commander')
+
+const version = `Alvori App version: ${JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'))).version}`
+const commands = ['dev', 'prod', 'build', '-h', '--help', '-app-v', '--app-version']
+const cmd = process.argv[2]
 
 const runDev = (args) => {
     process.env.MODE = 'development'
     process.env.BUILD_MODE = args.mode
     process.env.PWA = args.pwa
+    process.env.PORT = args.port
     const run = spawn('node', ['app/ssr/dev-server.js'], {
         cwd: process.cwd(),
         stdio: 'inherit',
@@ -25,6 +31,8 @@ const runDev = (args) => {
 const runProd = (args) => {
     process.env.MODE = 'production'
     process.env.BUILD_MODE = args.mode
+    process.env.PWA = args.pwa
+    process.env.PORT = args.port
     const run = spawn('node', ['dist/ssr/index.js'], {
         cwd: process.cwd(),
         stdio: 'inherit',
@@ -44,13 +52,14 @@ const runBuild = async (args) => {
 
     process.env.MODE = 'production'
     process.env.BUILD_MODE = args.mode
+    process.env.PWA = args.pwa
 
     let readyPromise, distDir
 
     if (args.mode === 'spa') {
         const clientConfig = require('../webpack/ssr/client')({ CONFIG: 'client', ...process.env })
 
-        distDir = path.resolve(__dirname, '../../dist', args.mode)
+        distDir = path.resolve(__dirname, '../../dist', args.pwa ? 'spa-pwa' : args.mode)
 
         if (fs.existsSync(distDir)) {
             rimraf(path.join(distDir), (err) => {
@@ -94,9 +103,11 @@ const runBuild = async (args) => {
 
         distDir = serverConfig.output.path
 
-        rimraf(path.join(distDir), (err) => {
-            console.log(err)
-        })
+        if (fs.existsSync(distDir)) {
+            rimraf(path.join(distDir), (err) => {
+                console.log(err)
+            })
+        }
 
         const clientCompiler = webpack(clientConfig)
         const serverCompiler = webpack(serverConfig)
@@ -183,4 +194,53 @@ Enjoy! - Alvori Team
     })
 }
 
-module.exports = { runDev, runProd, runBuild }
+if (commands.includes(cmd)) {
+    program
+        .command('dev')
+        .description('Compiles and hot-reload for development')
+        .option('-m, --mode [value]', 'Build mode', 'spa')
+        .option('-pwa, --pwa [type]', 'Enebled PWA')
+        .option('-p, --port [value]', 'App listening port', 3000)
+        .action((args) => {
+            runDev(args)
+        })
+
+    program
+        .command('prod')
+        .description('Run production build')
+        .option('-m, --mode [value]', 'Build mode', 'spa')
+        .option('-pwa, --pwa [type]', 'Enebled PWA')
+        .option('-p, --port [value]', 'App listening port', 3000)
+        .action((args) => {
+            runProd(args)
+        })
+
+    program
+        .command('build')
+        .description('Compiles and minifies for production')
+        .option('-m, --mode [value]', 'Build mode', 'spa')
+        .option('-pwa, --pwa [type]', 'Enebled PWA')
+        .action((args) => {
+            runBuild(args)
+        })
+
+    program.option('-app-v, --app-version', 'Show app version').action((args) => console.log(version))
+    program.option('-h, --help', 'Show app version').action((args) =>
+        console.log(`
+    Description
+        Builds distributables of your app.
+    Usage
+        $ alvori dev [options] - Compiles and hot-reload for development
+        $ alvori prod [options] - Run production build
+        $ alvori build [options] - Compiles and minifies for production
+    Options
+        --mode [value], -m [value] - App mode [spa|ssr] (default: spa)
+        --pwa, -pwa - Add PWA support in app [true|false] (default: false)
+        --port [number], -p [port number] - App listening port number (default: 3000)
+        --help, -h - Displays this message
+        --app-version, -app-v - Displays App version
+        `)
+    )
+
+    program.parse(process.argv)
+}

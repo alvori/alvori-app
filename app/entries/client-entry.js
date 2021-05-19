@@ -1,5 +1,5 @@
 import buildApp from './app'
-import './assets/css/app.scss'
+import '../../src/assets/css/app.scss'
 
 const { app, router, meta } = buildApp()
 

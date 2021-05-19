@@ -1,5 +1,4 @@
 const path = require('path')
-const webpack = require('webpack')
 const WebpackBar = require('webpackbar')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -10,12 +9,12 @@ const { merge } = require('webpack-merge')
 const baseConfig = require('./base.js')
 
 const isProd = process.env.MODE === 'production' ? true : false
-const buildMode = process.env.BUILD_MODE
+const buildMode = process.env.PWA !== 'undefined' ? `${process.env.BUILD_MODE}-pwa` : process.env.BUILD_MODE
 const buildDir = {
     ssr: 'ssr',
     spa: 'spa',
-    pwa: 'pwa',
-    ssrpwa: 'ssrpwa',
+    'spa-pwa': 'spa-pwa',
+    'ssr-pwa': 'ssr-pwa',
 }
 const prodAssetsPath = path.resolve(__dirname, '../../../dist', buildDir[buildMode], 'public')
 
@@ -24,7 +23,7 @@ const webpackConfig = new Chain()
 
 webpackConfig
     .entry('app')
-    .add('./src/client-entry.js')
+    .add('./app/entries/client-entry.js')
     .end()
     .output.path(isProd ? prodAssetsPath : path.resolve(__dirname, '../../../dist'))
     .filename('js/[name].js')
@@ -36,6 +35,7 @@ webpackConfig.devServer
     .set('contentBase', __dirname + './dist')
     .set('publicPath', '/')
     .set('hot', true)
+    .set('open', true)
     .set('disableHostCheck', true)
     // historyApiFallback: true,
     .set('overlay', true)
@@ -76,7 +76,7 @@ webpackConfig.plugin('MiniCssExtractPlugin').use(MiniCssExtractPlugin, [
     },
 ])
 
-if (isProd && process.env.PWA) {
+if (isProd && process.env.PWA !== 'undefined') {
     webpackConfig.plugin('workbox').use(WorkBoxPlugin.GenerateSW, [
         {
             clientsClaim: true,
@@ -142,14 +142,14 @@ webpackConfig.plugin('copy').use(CopyPlugin, [
                 },
                 to: prodAssetsPath,
             },
-            {
-                from: path.resolve(__dirname, '../../ssr/index.js'),
-                to: path.resolve(__dirname, '../../../dist/ssr'),
-                toType: 'dir',
-                info: {
-                    minimized: true,
-                },
-            },
+            // {
+            //     from: path.resolve(__dirname, '../../ssr/index.js'),
+            //     to: path.resolve(__dirname, '../../../dist/ssr'),
+            //     toType: 'dir',
+            //     info: {
+            //         minimized: true,
+            //     },
+            // },
         ],
     },
 ])

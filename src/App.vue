@@ -64,4 +64,10 @@ a {
         }
     }
 }
+
+@media screen and (max-width: 600px) {
+    .logo {
+        font-size: 4rem;
+    }
+}
 </style>

@@ -1,8 +1,8 @@
 import { createSSRApp, createApp } from 'vue'
 
-import App from './App.vue'
-import router from './router'
-import { meta } from './plugins/meta'
+import App from '../../src/App.vue'
+import router from '../../src/router'
+import { meta } from '../../src/plugins/meta'
 
 const isSSR = typeof window === 'undefined' || false
 
@@ -37,7 +37,7 @@ export default function (ctx) {
     __ALVORI_BOOT__.forEach(async (entry) => {
         const entryType = typeof entry
         const registerModule = async (path) => {
-            module = await import(`./boot/${path}`)
+            module = await import(`../../src/boot/${path}`)
         }
         let module
         if (entryType === 'string') {
