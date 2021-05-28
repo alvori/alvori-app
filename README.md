@@ -1,7 +1,10 @@
 # Vue 3 Server Side Rendering (SSR/PWA) | Alvori Freamwork
 
 Server Side Rendering (SSR) and Progressive Web Application (PWA) fraemwork for vue.js v3
-Use [Alvori CLI ](https://github.com/sander111/alvori-cli) for a Better User Experience
+
+## Recommends
+
+Use [Alvori CLI ](https://github.com/alvori/alvori-cli) for a Better User Experience
 
 ## Commands
 
