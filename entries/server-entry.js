@@ -1,8 +1,8 @@
-import buildApp from './app'
-import '@/assets/css/app.scss'
+import buildApp from './app.js'
+import '~/assets/css/app.scss'
 
 export default async (ctx) => {
-    const { router, app, meta } = buildApp(ctx)
+    const { router, app } = buildApp(ctx)
 
     await router.push(ctx.url)
     await router.isReady()
@@ -10,6 +10,5 @@ export default async (ctx) => {
     return {
         app,
         router,
-        meta,
     }
 }

@@ -1,19 +1,23 @@
 import { createSSRApp, createApp } from 'vue'
 
-import App from '@/App.vue'
-import router from '@/router'
-import { meta } from '@/plugins/meta'
-
-const isSSR = typeof window === 'undefined' || false
+import App from '~/App.vue'
+import router from '~/router'
 
 export default function (ctx) {
+    const isSSR = typeof window === 'undefined' || false
+
     const app = isSSR ? createSSRApp(App) : createApp(App)
+    
+    if(isSSR) {
+        app.config.globalProperties.$asyncData = {}
+        app.config.globalProperties.$meta = {}
+    }
 
     if (!isSSR && process.env.PWA !== 'undefined' && process.env.MODE === 'production') {
         if ('serviceWorker' in navigator) {
             const registerSW = async () => {
-                module = await import(`@/pwa/registerServiceWorker.js`)
-                module = await import(`@/pwa/customServiceWorker.js`)
+                module = await import(`~/pwa/registerServiceWorker.js`)
+                module = await import(`~/pwa/customServiceWorker.js`)
             }
             registerSW()
         }
@@ -27,13 +31,12 @@ export default function (ctx) {
     }
 
     app.use(router)
-    app.use(meta)
 
     if(__ALVORI_BOOT__.length > 0) {
         __ALVORI_BOOT__.forEach(async (entry) => {
             const entryType = typeof entry
             const registerModule = async (path) => {
-                module = await import(`@/boot/${path}`)
+                module = await import(`~/boot/${path}`)
             }
             let module
             if (entryType === 'string') {
@@ -65,11 +68,9 @@ export default function (ctx) {
                 })
         })
     }
-    
 
     return {
         app,
         router,
-        meta,
     }
 }

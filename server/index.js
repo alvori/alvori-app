@@ -1,12 +1,15 @@
-const path = require('path')
-const fs = require('fs')
-const express = require('express')
-const compression = require('compression')
-const { renderToString } = require('@vue/server-renderer')
-const app = express()
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path'
+import express from 'express'
+import compression from 'compression'
+import { renderToString } from '@vue/server-renderer'
+import createApp from './server-bundle.js'
 
-const appPath = path.join(__dirname, 'server-bundle.js')
-const createApp = require(appPath).default
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const app = express()
 
 const insertMeta = (meta, tpl) => {
     if (!meta) return tpl
@@ -26,10 +29,11 @@ const render = async (req, res) => {
         url: req.url === '/index.html' ? '/' : req.url,
     }
 
-    const { app, router, meta } = await createApp(context)
+    const { app, router } = await createApp(context)
 
     let appContent
     let code = 200
+    let state = ''
 
     await renderToString(app)
         .then((result) => {
@@ -45,8 +49,22 @@ const render = async (req, res) => {
         code = 404
     }
 
-    let html = template.replace('<div id="app"></div>', `<div id="app">${appContent}</div>`)
-    html = insertMeta(meta.data, html)
+    const asyncData = app.config.globalProperties.$asyncData
+    const meta = app.config.globalProperties.$meta
+
+    state = `
+        <script id="init-state">
+            window.__ALVORI_INITIAL_STATE__ = {}
+            window.__ALVORI_INITIAL_STATE__.data = ${typeof asyncData !== 'undefined' ? JSON.stringify(asyncData) : `null`}
+        </script>
+    `
+
+    if (router.currentRoute._value.name === '404') {
+        code = 404
+    }
+
+    let html = template.replace('<div id="app"></div>', `<div id="app">${appContent}</div>${state}`)
+    html = insertMeta(meta, html)
     res.status(code)
     res.set('content-type', 'text/html')
     res.send(html)

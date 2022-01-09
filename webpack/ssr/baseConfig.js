@@ -1,36 +1,35 @@
-const path = require('path')
-const webpack = require('webpack')
-const { VueLoaderPlugin } = require('vue-loader')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const TerserPlugin = require('terser-webpack-plugin')
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
-const fs = require('fs')
+import path from 'path'
+import webpack from 'webpack'
+import { VueLoaderPlugin } from 'vue-loader'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import TerserPlugin from 'terser-webpack-plugin'
+import fs from 'fs'
+import url from 'url'
+
+import Chain from 'webpack-chain'
+
+
+const loadExtendConfig = async () => {
+    return await import(url.pathToFileURL(path.join(process.cwd(), 'alvori.config.js')))
+}
+
+let extendConfig = null
+if(fs.existsSync(path.resolve(process.cwd(), 'alvori.config.js'))) {
+    extendConfig = await loadExtendConfig()
+}
 
 const isProd = process.env.MODE === 'production' ? true : false
-
-const Chain = require('webpack-chain')
 const webpackConfig = new Chain()
 
 webpackConfig.mode(process.env.MODE)
 
 webpackConfig.resolve.alias
-    .set('@', path.resolve(process.cwd(), 'src'))
+    .set('~', path.resolve(process.cwd(), 'src'))
     .set('vue$', 'vue/dist/vue.runtime.esm-bundler.js')
 
 webpackConfig.resolve.extensions.add('.mjs').add('.js').add('.jsx').add('.vue').add('.json').add('.wasm')
 
 webpackConfig.module.noParse(/^(vue|vue-router|vuex|vuex-router-sync)$/)
-
-webpackConfig.module
-    .rule('babel')
-    .test(/\.m?js$/)
-    .exclude.add(/(node_modules|bower_components)/)
-    .end()
-    .use('babel')
-    .loader('babel-loader')
-    .options({
-        envName: isProd ? 'prod' : 'dev',
-    })
 
 webpackConfig.module
     .rule('vue')
@@ -115,8 +114,8 @@ webpackConfig.optimization
     .minimizer('terser')
     .use(TerserPlugin, [
         {
-            sourceMap: isProd ? false : true,
-            cache: true,
+            // sourceMap: isProd ? false : true,
+            // cache: true,
             parallel: true,
             extractComments: false,
             terserOptions: {
@@ -160,14 +159,9 @@ webpackConfig.plugin('define').use(webpack.DefinePlugin, [
         'process.env.MODE': JSON.stringify(process.env.MODE),
     },
 ])
-webpackConfig.plugin('friendyErrors').use(FriendlyErrorsWebpackPlugin)
 
-module.exports = (env, options) => {
-    if(fs.existsSync(path.resolve(process.cwd(), 'alvori.config.js'))) {
-        const alvoriConfig = require(path.resolve(process.cwd(), 'alvori.config.js'))(env)
-        alvoriConfig.chainWebpack(webpackConfig)
-    }
-    
+const baseConfig = (env, options) => {
+    const alvoriConfig = extendConfig.default(env)
 
     webpackConfig.plugin('define').use(webpack.DefinePlugin, [
         {
@@ -175,8 +169,13 @@ module.exports = (env, options) => {
             __VUE_PROD_DEVTOOLS__: false,
             'process.env.MODE': JSON.stringify(process.env.MODE),
             'process.env.PWA': JSON.stringify(process.env.PWA),
-            __ALVORI_BOOT__: typeof alvoriConfig !== 'undefined' ? JSON.stringify(alvoriConfig.boot) : {},
+            __ALVORI_BOOT__: typeof alvoriConfig !== 'undefined' ? JSON.stringify(alvoriConfig.boot) : [],
         },
     ])
+
     return webpackConfig.toConfig(env, options)
+}
+
+export {
+    baseConfig
 }

@@ -1,7 +1,7 @@
-import buildApp from './app'
-import '@/assets/css/app.scss'
+import buildApp from './app.js'
+import '~/assets/css/app.scss'
 
-const { app, router, meta } = buildApp()
+const { app, router } = buildApp()
 
 router.isReady().then(() => {
     app.mount('#app')

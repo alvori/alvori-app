@@ -27,7 +27,7 @@ const runDev = (args) => {
     process.env.PWA = args.pwa
     process.env.PORT = args.port
     process.env.PWA !== 'undefined' && addServiceWorker()
-    const run = spawn('node', [path.join(__dirname, '../ssr/dev-server.js')], {
+    const run = spawn('node', [path.join(__dirname, '../server/devServer.js')], {
         cwd: process.cwd(),
         stdio: 'inherit',
         shell: true,
@@ -71,7 +71,7 @@ const runBuild = async (args) => {
     let readyPromise, distDir
 
     if (args.mode === 'spa') {
-        const clientConfig = require('../webpack/ssr/client')({ CONFIG: 'client', ...process.env })
+        const clientConfig = require('../webpack/ssr/clientConfig')({ CONFIG: 'client', ...process.env })
 
         distDir = path.resolve(process.cwd(), 'dist', args.pwa ? 'spa-pwa' : args.mode)
 
@@ -113,8 +113,10 @@ const runBuild = async (args) => {
         }).catch(() => {})
         
     } else if (args.mode === 'ssr') {
-        const clientConfig = require('../webpack/ssr/client')({ CONFIG: 'client', ...process.env })
-        const serverConfig = require('../webpack/ssr/server')({ CONFIG: 'server', ...process.env })
+        let { clientConfig } = await import('../webpack/ssr/clientConfig.js')
+        let { serverConfig } = await import('../webpack/ssr/serverConfig.js')
+        clientConfig = clientConfig({ CONFIG: 'client', ...process.env })
+        serverConfig = serverConfig({ CONFIG: 'server', ...process.env })
 
         distDir = serverConfig.output.path
 
@@ -181,6 +183,7 @@ const runBuild = async (args) => {
                     }
                 }
                 newPkg.scripts.start = 'node index.js'
+                newPkg.type = 'module'
 
                 fs.writeFileSync(
                     `${distDir}/package.json`,

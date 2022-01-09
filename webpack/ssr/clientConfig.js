@@ -1,12 +1,18 @@
-const path = require('path')
-const WebpackBar = require('webpackbar')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin')
-const WorkBoxPlugin = require('workbox-webpack-plugin')
-const CopyPlugin = require('copy-webpack-plugin')
-const { merge } = require('webpack-merge')
-const baseConfig = require('./base.js')
+import path from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path'
+import WebpackBar from 'webpackbar'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import PreloadWebpackPlugin from '@vue/preload-webpack-plugin'
+import WorkBoxPlugin from 'workbox-webpack-plugin'
+import CopyPlugin from 'copy-webpack-plugin'
+import { merge } from 'webpack-merge'
+import { baseConfig } from './baseConfig.js'
+import Chain from 'webpack-chain'
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const isProd = process.env.MODE === 'production' ? true : false
 const buildMode = process.env.PWA !== 'undefined' ? `${process.env.BUILD_MODE}-pwa` : process.env.BUILD_MODE
@@ -17,8 +23,6 @@ const buildDir = {
     'ssr-pwa': 'ssr-pwa',
 }
 const prodAssetsPath = path.resolve(process.cwd(), 'dist', buildDir[buildMode], 'public')
-
-const Chain = require('webpack-chain')
 const webpackConfig = new Chain()
 
 webpackConfig
@@ -30,15 +34,31 @@ webpackConfig
     .chunkFilename('js/[name].js')
     .publicPath('/')
 
-webpackConfig.devServer
-    .set('stats', 'minimal')
-    .set('contentBase', path.join(process.cwd(), 'dist/dev'))
-    .set('publicPath', '/')
-    .set('hot', true)
-    .set('open', true)
-    .set('disableHostCheck', true)
-    // historyApiFallback: true,
-    .set('overlay', true)
+webpackConfig.module
+    .rule('babel')
+    .test(/\.m?js$/)
+    .exclude.add(/(node_modules|bower_components)/)
+    .end()
+    .use('babel')
+    .loader('babel-loader')
+    .options({
+        envName: isProd ? 'prod' : 'dev',
+    })
+
+// webpackConfig.devServer
+//     // .set('stats', 'minimal')
+//     // .set('contentBase', path.join(process.cwd(), 'dist/dev'))
+//     // .set('publicPath', '/')
+//     // .set('hot', true)
+//     // .set('open', true)
+//     // .set('disableHostCheck', true)
+//     // historyApiFallback: true,
+//     // .set('overlay', true)
+//     .set('static', {
+//         directory: path.resolve(process.cwd(), './dist'),
+//         publicPath: path.resolve(process.cwd()),
+//         watch: true,
+//     })
 
 webpackConfig.target('web')
 
@@ -83,7 +103,6 @@ if (isProd && process.env.PWA !== 'undefined') {
             skipWaiting: true,
             swDest: './service-worker.js',
             exclude: [
-                // /index\.html$/,
                 /index\.js$/,
             ],
             runtimeCaching: [
@@ -103,12 +122,10 @@ webpackConfig.plugin('HtmlWebpackPlugin').use(HtmlWebpackPlugin, [
             pwaManifest: '<link rel="manifest" href="/manifest.json"/>',
         },
         chunks: ['vendors', 'common', 'index', 'app'],
-        // base: '/',
         inject: 'body',
         template: 'public/index.html',
         filename: isProd ? '../index.html' : 'index.html',
         scriptLoading: 'defer',
-        // hash: true,
     },
 ])
 
@@ -142,16 +159,28 @@ webpackConfig.plugin('copy').use(CopyPlugin, [
                 },
                 to: prodAssetsPath,
             },
-            // {
-            //     from: path.resolve(__dirname, '../../ssr/index.js'),
-            //     to: path.resolve(__dirname, '../../../dist/ssr'),
-            //     toType: 'dir',
-            //     info: {
-            //         minimized: true,
-            //     },
-            // },
         ],
     },
 ])
 
-module.exports = (env, options) => merge(baseConfig({ ...env, config: 'client' }), webpackConfig.toConfig())
+const clientConfig = (env, options) => {
+    return merge(baseConfig({ ...env, config: 'client' }), webpackConfig.toConfig(), {devServer: {
+            host: 'localhost',
+            port: process.env.PORT || 3000,
+            liveReload: false,
+            allowedHosts: 'all',
+            devMiddleware: {
+                stats: 'minimal',
+            },
+            static: {
+                directory: path.resolve(process.cwd(), 'dist/dev'),
+                publicPath: path.resolve(process.cwd()),
+                watch: true,
+            },
+        }
+    })
+}
+
+export {
+    clientConfig
+}
