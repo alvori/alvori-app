@@ -40,8 +40,6 @@ webpackConfig.module
 webpackConfig.module
     .rule('scss')
     .test(/\.(sa|sc|c)ss$/)
-    .exclude.add(/(node_modules|bower_components)/)
-    .end()
     .use('miniCssExtractPluginLoader')
     .loader(MiniCssExtractPlugin.loader)
     .end()
@@ -57,7 +55,7 @@ webpackConfig.module
 
 webpackConfig.module
     .rule('images')
-    .test(/\.(png|jpe?g|gif|webp)(\?.*)?$/)
+    .test(/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/)
     .use('url-loader')
     .loader('url-loader')
     .options({
@@ -70,14 +68,14 @@ webpackConfig.module
         },
     })
 
-webpackConfig.module
-    .rule('svg')
-    .test(/\.(svg)(\?.*)?$/)
-    .use('svg')
-    .loader('file-loader')
-    .options({
-        name: 'img/[name].[hash:8].[ext]',
-    })
+// webpackConfig.module
+//     .rule('svg')
+//     .test(/\.(svg)(\?.*)?$/)
+//     .use('svg')
+//     .loader('file-loader')
+//     .options({
+//         name: 'img/[name].[ext]',
+//     })
 
 webpackConfig.module
     .rule('media')

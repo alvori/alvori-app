@@ -46,7 +46,7 @@ webpackConfig
 
 webpackConfig.externals(
     nodeExternals({
-        allowlist: [alvori, /\.(css|vue)$/],
+        allowlist: [...alvori, /\.(css|vue)$/],
         importType: 'module'
     }))
 
